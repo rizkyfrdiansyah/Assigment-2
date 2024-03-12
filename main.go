@@ -1,50 +1,28 @@
 package main
 
 import (
-	"fmt"
+	"restAPI/controllers"
+	"restAPI/database"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-type Items struct {
-	gorm.Model
-	ItemCode string `json:"item_code"`
-	Description string `json:"description"`
-	Quantity int `json:"quantity"`
-	OrderID int `json:"order_id"`
-}
-
-type Orders struct {
-	gorm.Model
-	CustomerName string `json:"customer_name"`
-	OrderedAt string `json:"ordered_at"`
-}
-
 func main() {
-	var err error
-	db, err = gorm.Open(postgres.Open("host=localhost user=postgres dbname=Inventory_Management sslmode=disable password=Swadaya05"), &gorm.Config{})
-	if err != nil {
-		panic("Gagal terhubung ke database")
-	}
-
-	db.AutoMigrate(&Items{}, &Orders{})
-
 	router := gin.Default()
 
-	// router.POST("/orders", getOrder)
+	// Connect to the database
+	database.Connect()
 
-	// router.PUT("/orders/:orderId", updateOrder)
+	// API routes
+	v1 := router.Group("/api/v1")
+	// Endpoints
+	{
+		v1.POST("/orders", controllers.CreateOrder)
+		v1.GET("/orders", controllers.GetOrders)
+	}
+	// router.POST("/orders", controllers.CreateOrder)
+	// router.GET("/orders", controllers.GetOrders)
 
-	// router.DELETE("/orders/:orderId", deleteOrder)
-
-	fmt.Println("Server berjalan pada port 8080")
-	router.Run(":8080")
-}
-
-func createOrder(c *gin.Context) {
-
+	// Run the server
+	router.Run(":8000")
 }
